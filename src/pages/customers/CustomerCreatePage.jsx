@@ -1,6 +1,6 @@
 import { useState, useEffect } from 'react';
 import { useNavigate, useBlocker } from 'react-router-dom';
-import { createCustomer, getCustomerSubtypesByType } from '../../api/customerApi';
+import { createCustomer, getCustomerSubtypesByType, searchCustomer } from '../../api/customerApi';
 import { validateEmail, validatePhone, validateIdentification, validateRuc } from '../../helpers/validators';
 import ConfirmModal from '../../components/ui/ConfirmModal';
 import RepresentativeSearchModal from '../../components/customers/RepresentativeSearchModal';
@@ -111,13 +111,27 @@ export const CustomerCreatePage = () => {
     }
   };
 
-  const handleBlur = (e) => {
+  const handleBlur = async (e) => {
     const { name, value } = e.target;
     setTouched((prev) => ({ ...prev, [name]: true }));
-    setFieldErrors((prev) => ({
-      ...prev,
-      [name]: validateField(name, value, name === 'identificationNumber' ? formData.identificationType : undefined),
-    }));
+    const formatError = validateField(name, value, name === 'identificationNumber' ? formData.identificationType : undefined);
+
+    if (name === 'identificationNumber' && !formatError && value) {
+      try {
+        await searchCustomer(formData.identificationType, value);
+        setFieldErrors((prev) => ({
+          ...prev,
+          [name]: `Ya existe un cliente registrado con este ${formData.identificationType}`,
+        }));
+      } catch (err) {
+        setFieldErrors((prev) => ({
+          ...prev,
+          [name]: err.response?.status === 404 ? '' : formatError,
+        }));
+      }
+    } else {
+      setFieldErrors((prev) => ({ ...prev, [name]: formatError }));
+    }
   };
 
   const handleCustomerTypeChange = (newType) => {

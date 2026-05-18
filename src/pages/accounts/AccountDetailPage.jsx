@@ -206,6 +206,8 @@ export const AccountDetailPage = () => {
                     <tr>
                       <th className="p-3">Fecha</th>
                       <th className="p-3">Tipo</th>
+                      <th className="p-3">Cuenta Origen</th>
+                      <th className="p-3">Cuenta Destino</th>
                       <th className="p-3">Monto</th>
                       <th className="p-3">Saldo</th>
                       <th className="p-3">Estado</th>
@@ -213,22 +215,29 @@ export const AccountDetailPage = () => {
                     </tr>
                   </thead>
                   <tbody>
-                    {transactions.map((tx, idx) => (
-                      <tr key={tx.id ?? tx.transactionUuid ?? idx} className="border-b hover:bg-gray-50">
-                        <td className="p-3">{formatDateTime(tx.date)}</td>
-                        <td className="p-3">
-                          <span className={tx.type === 'DEBITO' ? 'text-red-600' : 'text-green-600'}>
-                            {tx.type}
-                          </span>
-                        </td>
-                        <td className="p-3">{formatCurrency(tx.amount)}</td>
-                        <td className="p-3">{formatCurrency(tx.resultingBalance)}</td>
-                        <td className="p-3">
-                          <StatusBadge status={tx.status} />
-                        </td>
-                        <td className="p-3 text-gray-600">{tx.message || tx.description}</td>
-                      </tr>
-                    ))}
+                    {transactions.map((tx, idx) => {
+                      const movType = tx.movementType || tx.type;
+                      const isDebit = movType === 'DEBITO';
+                      const txStatus = tx.status;
+                      const statusLabel = txStatus === 'COMPLETADA' ? 'Exitoso' : txStatus === 'RECHAZADA' ? 'Rechazado' : txStatus || '—';
+                      const statusCls = txStatus === 'COMPLETADA' ? 'text-green-700 font-semibold' : txStatus === 'RECHAZADA' ? 'text-red-600 font-semibold' : 'text-gray-600';
+                      return (
+                        <tr key={tx.id ?? tx.transactionUuid ?? idx} className="border-b hover:bg-gray-50">
+                          <td className="p-3">{formatDateTime(tx.transactionDate || tx.date)}</td>
+                          <td className="p-3">
+                            <span className={isDebit ? 'text-red-600 font-semibold' : 'text-green-600 font-semibold'}>
+                              {movType}
+                            </span>
+                          </td>
+                          <td className="p-3 font-mono text-xs">{isDebit ? (tx.accountNumber || accountNumber) : (tx.counterpartAccountNumber || '—')}</td>
+                          <td className="p-3 font-mono text-xs">{!isDebit ? (tx.accountNumber || accountNumber) : (tx.counterpartAccountNumber || '—')}</td>
+                          <td className="p-3">{formatCurrency(tx.amount)}</td>
+                          <td className="p-3">{formatCurrency(tx.resultingBalance)}</td>
+                          <td className="p-3"><span className={statusCls}>{statusLabel}</span></td>
+                          <td className="p-3 text-gray-600">{tx.message || tx.description}</td>
+                        </tr>
+                      );
+                    })}
                   </tbody>
                 </table>
               </div>

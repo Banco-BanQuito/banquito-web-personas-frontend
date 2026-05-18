@@ -116,7 +116,9 @@ export const TransactionHistoryPage = () => {
               <tr>
                 <th className="p-3 text-left">Fecha/Hora</th>
                 <th className="p-3 text-left">Tipo</th>
-                <th className="p-3 text-left">Subtipo</th>
+                <th className="p-3 text-left">Cuenta Origen</th>
+                <th className="p-3 text-left">Cuenta Destino</th>
+                <th className="p-3 text-left">Estado</th>
                 <th className="p-3 text-left">Descripción</th>
                 <th className="p-3 text-right">Monto</th>
                 <th className="p-3 text-right">Saldo Resultante</th>
@@ -126,30 +128,40 @@ export const TransactionHistoryPage = () => {
             <tbody>
               {transactions.map((tx, idx) => {
                 const movementType = tx.movementType || tx.type;
+                const isDebit = movementType === 'DEBITO';
+                const txStatus = tx.status;
+                const statusLabel = txStatus === 'COMPLETADA' ? 'Exitoso' : txStatus === 'RECHAZADA' ? 'Rechazado' : txStatus || '—';
+                const statusCls = txStatus === 'COMPLETADA' ? 'text-green-700 font-semibold' : txStatus === 'RECHAZADA' ? 'text-red-600 font-semibold' : 'text-gray-600';
 
                 return (
                   <tr key={tx.id ?? tx.transactionUuid ?? idx} className="border-b hover:bg-gray-50">
                     <td className="p-3 text-gray-700">
-                      {formatDateTime(tx.date)}
+                      {formatDateTime(tx.transactionDate || tx.date)}
                     </td>
 
                     <td className="p-3">
-                      <span className={movementType === 'DEBITO' ? 'text-red-600 font-semibold' : 'text-green-600 font-semibold'}>
+                      <span className={isDebit ? 'text-red-600 font-semibold' : 'text-green-600 font-semibold'}>
                         {movementType}
                       </span>
                     </td>
 
-                    <td className="p-3 text-gray-700 text-xs">
-                      {tx.subtypeName || tx.subtypeCode || 'No disponible'}
+                    <td className="p-3 font-mono text-xs text-gray-700">
+                      {isDebit ? (tx.accountNumber || '—') : (tx.counterpartAccountNumber || '—')}
                     </td>
+
+                    <td className="p-3 font-mono text-xs text-gray-700">
+                      {!isDebit ? (tx.accountNumber || '—') : (tx.counterpartAccountNumber || '—')}
+                    </td>
+
+                    <td className="p-3"><span className={statusCls}>{statusLabel}</span></td>
 
                     <td className="p-3 text-gray-700">
                       {tx.message || tx.description || 'Sin descripción'}
                     </td>
 
                     <td className="p-3 text-right">
-                      <span className={movementType === 'DEBITO' ? 'text-red-600 font-semibold' : 'text-green-600 font-semibold'}>
-                        {movementType === 'DEBITO' ? '-' : '+'}
+                      <span className={isDebit ? 'text-red-600 font-semibold' : 'text-green-600 font-semibold'}>
+                        {isDebit ? '-' : '+'}
                         {formatCurrency(tx.amount)}
                       </span>
                     </td>

@@ -159,10 +159,6 @@ export const CustomerDetailPage = () => {
                 <p className="font-semibold">{customer.identification}</p>
               </div>
               <div>
-                <p className="text-gray-600 text-sm">Estado</p>
-                <StatusBadge status={customer.status} />
-              </div>
-              <div>
                 <p className="text-gray-600 text-sm">Email</p>
                 <p className="font-semibold">{customer.email}</p>
               </div>

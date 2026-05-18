@@ -5,7 +5,6 @@ import {
   UserPlus,
   Repeat,
   Building2,
-  CalendarDays,
   Menu,
 } from 'lucide-react';
 
@@ -15,7 +14,6 @@ const menuItems = [
   { path: '/cuentas/nueva',       label: 'Nueva Cuenta',  Icon: UserPlus },
   { path: '/transacciones/nueva', label: 'Transacciones', Icon: Repeat },
   { path: '/sucursales',          label: 'Sucursales',    Icon: Building2 },
-  { path: '/feriados',            label: 'Feriados',      Icon: CalendarDays },
 ];
 
 const Sidebar = ({ isOpen, onToggle }) => {
