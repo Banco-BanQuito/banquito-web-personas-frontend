@@ -6,6 +6,7 @@ import Sidebar from './components/layout/Sidebar';
 import Topbar from './components/layout/Topbar';
 
 import { LoginPage } from './pages/LoginPage';
+import { ChangePasswordPage } from './pages/ChangePasswordPage';
 import { DashboardPage } from './pages/DashboardPage';
 import { BranchesPage } from './pages/BranchesPage';
 import { HolidaysPage } from './pages/HolidaysPage';
@@ -42,6 +43,10 @@ const router = createBrowserRouter(
     {
       path: '/login',
       element: <LoginPage />,
+    },
+    {
+      path: '/cambiar-contrasena',
+      element: <ChangePasswordPage />,
     },
     {
       path: '/',

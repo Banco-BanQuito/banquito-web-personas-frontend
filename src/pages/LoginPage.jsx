@@ -36,11 +36,13 @@ export function LoginPage() {
     setLoading(true);
 
     try {
-      if (login) {
-        await login(username, password);
-      }
+      const userData = login ? await login(username, password) : null;
 
-      navigate('/dashboard', { replace: true });
+      if (userData?.mustChangePassword) {
+        navigate('/cambiar-contrasena', { replace: true });
+      } else {
+        navigate('/dashboard', { replace: true });
+      }
     } catch (err) {
       if (import.meta.env.DEV) {
         console.error('Error en login de cliente:', err.response?.status, err.response?.data);

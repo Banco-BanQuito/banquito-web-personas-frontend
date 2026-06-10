@@ -43,10 +43,12 @@ export function AuthProvider({ children }) {
         customerType: data.customerType,
         customerStatus: data.customerStatus,
         credentialStatus: data.credentialStatus,
+        mustChangePassword: data.mustChangePassword ?? false,
       };
 
       const newAuth = {
         isAuthenticated: true,
+        mustChangePassword: userData.mustChangePassword,
         portal: 'web-personas',
         user: userData,
       };

@@ -6,10 +6,11 @@ const partyApi = axios.create({
 });
 
 export const loginCustomer = (username, password) => {
-  return partyApi.post('/auth/login', {
-    username,
-    password,
-  });
+  return partyApi.post('/auth/login', { username, password });
+};
+
+export const changePassword = (username, currentPassword, newPassword) => {
+  return partyApi.put('/auth/change-password', { username, currentPassword, newPassword });
 };
 
 export const getCustomer = (id) => {
