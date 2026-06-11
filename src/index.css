@@ -28,6 +28,7 @@
   margin: 0;
   padding: 0;
   box-sizing: border-box;
+  transition: background-color 0.2s ease, color 0.2s ease, border-color 0.2s ease, box-shadow 0.2s ease;
 }
 
 html {
@@ -60,11 +61,6 @@ body {
 
 ::-webkit-scrollbar-thumb:hover {
   background: var(--color-gray-dark);
-}
-
-/* Animaciones suaves */
-* {
-  transition: background-color 0.2s ease, color 0.2s ease, border-color 0.2s ease, box-shadow 0.2s ease;
 }
 
 /* Animación fade up */

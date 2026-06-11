@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useCallback, useMemo } from 'react';
 import { AuthContext } from './authContextObject';
 import { loginCustomer } from '../api/partyApi';
 
@@ -22,16 +22,7 @@ function loadStoredAuth() {
 export function AuthProvider({ children }) {
   const [auth, setAuth] = useState(loadStoredAuth);
 
-  useEffect(() => {
-    const handleLogout = () => {
-      logout();
-    };
-
-    window.addEventListener('logout', handleLogout);
-    return () => window.removeEventListener('logout', handleLogout);
-  }, []);
-
-  const login = async (username, password) => {
+  const login = useCallback(async (username, password) => {
     try {
       const response = await loginCustomer(username, password);
       const data = response.data;
@@ -71,9 +62,9 @@ export function AuthProvider({ children }) {
 
       throw err;
     }
-  };
+  }, []);
 
-  const logout = () => {
+  const logout = useCallback(() => {
     const newAuth = {
       isAuthenticated: false,
       portal: null,
@@ -83,10 +74,25 @@ export function AuthProvider({ children }) {
     setAuth(newAuth);
     localStorage.removeItem(STORAGE_KEY);
     localStorage.removeItem('customer');
-  };
+  }, []);
+
+  useEffect(() => {
+    const handleLogout = () => {
+      logout();
+    };
+
+    window.addEventListener('logout', handleLogout);
+    return () => window.removeEventListener('logout', handleLogout);
+  }, [logout]);
+
+  const contextValue = useMemo(() => ({
+    ...auth,
+    login,
+    logout,
+  }), [auth, login, logout]);
 
   return (
-    <AuthContext.Provider value={{ ...auth, login, logout }}>
+    <AuthContext.Provider value={contextValue}>
       {children}
     </AuthContext.Provider>
   );

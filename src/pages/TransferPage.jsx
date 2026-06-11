@@ -66,6 +66,69 @@ export function TransferPage() {
     (account) => String(account.accountId) === String(originAccountId)
   );
 
+  const validateTransferForm = () => {
+    if (!originAccountId) {
+      return 'Seleccione la cuenta origen.';
+    }
+
+    if (!destinationAccount.trim()) {
+      return 'Ingrese la cuenta destino.';
+    }
+
+    if (!owner) {
+      return 'Primero debe validar el titular de la cuenta destino.';
+    }
+
+    if (!amount || Number(amount) <= 0) {
+      return 'Ingrese un monto válido para la transferencia.';
+    }
+
+    const numericAmount = Number(amount);
+
+    if (selectedOriginAccount && numericAmount > Number(selectedOriginAccount.availableBalance)) {
+      return 'Saldo insuficiente para esta transferencia.';
+    }
+
+    return '';
+  };
+
+  const buildTransferPayload = () => ({
+    originAccountId: Number(originAccountId),
+    destinationAccountNumber: destinationAccount.trim(),
+    amount: Number(amount),
+    transactionUuid: crypto.randomUUID(),
+    reference: description.trim() || 'Transferencia P2P Web Personas',
+  });
+
+  const updateOriginAccountBalance = (originNewBalance) => {
+    setAccounts((prevAccounts) =>
+      prevAccounts.map((account) =>
+        String(account.accountId) === String(originAccountId)
+          ? {
+              ...account,
+              availableBalance: originNewBalance,
+            }
+          : account
+      )
+    );
+  };
+
+  const getTransferErrorMessage = (error) => {
+    if (!error.response) {
+      return 'No se puede conectar al account-core-service. Verifique que el servicio esté encendido.';
+    }
+
+    const { status, data } = error.response;
+
+    const errorMessages = {
+      400: data?.message || 'Saldo insuficiente o datos inválidos.',
+      404: 'La cuenta destino no está disponible o no existe.',
+      409: 'Operación duplicada.',
+    };
+
+    return errorMessages[status] || data?.message || 'Error temporal, intente en unos minutos.';
+  };
+
   const handleValidateOwner = async () => {
     setMessage('');
     setOwner(null);
@@ -110,70 +173,23 @@ export function TransferPage() {
     setMessage('');
     setTransferResult(null);
 
-    if (!originAccountId) {
-      setMessage('Seleccione la cuenta origen.');
+    const validationMessage = validateTransferForm();
+
+    if (validationMessage) {
+      setMessage(validationMessage);
       return;
     }
-
-    if (!destinationAccount.trim()) {
-      setMessage('Ingrese la cuenta destino.');
-      return;
-    }
-
-    if (!owner) {
-      setMessage('Primero debe validar el titular de la cuenta destino.');
-      return;
-    }
-
-    if (!amount || Number(amount) <= 0) {
-      setMessage('Ingrese un monto válido para la transferencia.');
-      return;
-    }
-
-    const numericAmount = Number(amount);
-
-    if (selectedOriginAccount && numericAmount > Number(selectedOriginAccount.availableBalance)) {
-      setMessage('Saldo insuficiente para esta transferencia.');
-      return;
-    }
-
-    const payload = {
-      originAccountId: Number(originAccountId),
-      destinationAccountNumber: destinationAccount.trim(),
-      amount: numericAmount,
-      transactionUuid: crypto.randomUUID(),
-      reference: description.trim() || 'Transferencia P2P Web Personas',
-    };
 
     setTransferring(true);
 
     try {
-      const response = await transferP2P(payload);
+      const response = await transferP2P(buildTransferPayload());
+
       setTransferResult(response.data);
       setMessage('Transferencia realizada correctamente.');
-
-      setAccounts((prevAccounts) =>
-        prevAccounts.map((account) =>
-          String(account.accountId) === String(originAccountId)
-            ? {
-                ...account,
-                availableBalance: response.data.originNewBalance,
-              }
-            : account
-        )
-      );
+      updateOriginAccountBalance(response.data.originNewBalance);
     } catch (error) {
-      if (!error.response) {
-        setMessage('No se puede conectar al account-core-service. Verifique que el servicio esté encendido.');
-      } else if (error.response.status === 400) {
-        setMessage(error.response?.data?.message || 'Saldo insuficiente o datos inválidos.');
-      } else if (error.response.status === 404) {
-        setMessage('La cuenta destino no está disponible o no existe.');
-      } else if (error.response.status === 409) {
-        setMessage('Operación duplicada.');
-      } else {
-        setMessage(error.response?.data?.message || 'Error temporal, intente en unos minutos.');
-      }
+      setMessage(getTransferErrorMessage(error));
     } finally {
       setTransferring(false);
     }
