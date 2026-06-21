@@ -31,7 +31,7 @@ function generateUuid() {
   }
 
   return 'xxxxxxxx-xxxx-4xxx-yxxx-xxxxxxxxxxxx'.replace(/[xy]/g, (character) => {
-    const randomValue = (Math.random() * 16) | 0;
+    const randomValue = Math.trunc(Math.random() * 16);
     const value = character === 'x' ? randomValue : (randomValue & 0x3) | 0x8;
     return value.toString(16);
   });
@@ -107,10 +107,10 @@ export function TransferPage() {
           setMessage('El cliente autenticado no tiene cuentas disponibles.');
         }
       } catch (error) {
-        if (!error.response) {
-          setMessage('No se puede conectar al account-core-service. Verifique que el servicio esté encendido.');
-        } else {
+        if (error.response) {
           setMessage(error.response?.data?.message || 'No se pudieron cargar las cuentas del cliente.');
+        } else {
+          setMessage('No se puede conectar al account-core-service. Verifique que el servicio esté encendido.');
         }
       } finally {
         setLoadingAccounts(false);
@@ -349,7 +349,7 @@ export function TransferPage() {
   };
 
   const handlePrint = () => {
-    window.print();
+    globalThis.print();
   };
 
   if (transferResult) {
@@ -514,8 +514,9 @@ export function TransferPage() {
         className="bg-white rounded-2xl shadow-sm border border-slate-200 p-6 space-y-5 max-w-3xl"
       >
         <div>
-          <label className="block text-sm font-medium text-slate-700 mb-2">Cuenta origen</label>
+          <label htmlFor="transfer-origin-select" className="block text-sm font-medium text-slate-700 mb-2">Cuenta origen</label>
           <select
+            id="transfer-origin-select"
             value={originAccountId}
             onChange={(event) => {
               setOriginAccountId(event.target.value);
@@ -544,8 +545,9 @@ export function TransferPage() {
         {transferMode === 'external' ? (
           <>
             <div>
-              <label className="block text-sm font-medium text-slate-700 mb-2">Banco destino</label>
+              <label htmlFor="transfer-bank-select" className="block text-sm font-medium text-slate-700 mb-2">Banco destino</label>
               <select
+                id="transfer-bank-select"
                 value={externalBankCode}
                 onChange={(event) => setExternalBankCode(event.target.value)}
                 className="w-full rounded-xl border border-slate-300 px-4 py-3 focus:outline-none focus:ring-2 focus:ring-blue-700"
@@ -560,8 +562,9 @@ export function TransferPage() {
               )}
             </div>
             <div>
-              <label className="block text-sm font-medium text-slate-700 mb-2">Número de cuenta externa</label>
+              <label htmlFor="transfer-external-account-input" className="block text-sm font-medium text-slate-700 mb-2">Número de cuenta externa</label>
               <input
+                id="transfer-external-account-input"
                 type="text"
                 value={externalAccountNumber}
                 onChange={(event) => setExternalAccountNumber(event.target.value)}
@@ -571,8 +574,9 @@ export function TransferPage() {
             </div>
             <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
               <div>
-                <label className="block text-sm font-medium text-slate-700 mb-2">Nombres del beneficiario</label>
+                <label htmlFor="transfer-beneficiary-firstname-input" className="block text-sm font-medium text-slate-700 mb-2">Nombres del beneficiario</label>
                 <input
+                  id="transfer-beneficiary-firstname-input"
                   type="text"
                   value={beneficiaryFirstName}
                   onChange={(event) => setBeneficiaryFirstName(event.target.value)}
@@ -581,8 +585,9 @@ export function TransferPage() {
                 />
               </div>
               <div>
-                <label className="block text-sm font-medium text-slate-700 mb-2">Apellidos del beneficiario</label>
+                <label htmlFor="transfer-beneficiary-lastname-input" className="block text-sm font-medium text-slate-700 mb-2">Apellidos del beneficiario</label>
                 <input
+                  id="transfer-beneficiary-lastname-input"
                   type="text"
                   value={beneficiaryLastName}
                   onChange={(event) => setBeneficiaryLastName(event.target.value)}
@@ -595,9 +600,10 @@ export function TransferPage() {
           </>
         ) : (
           <div>
-            <label className="block text-sm font-medium text-slate-700 mb-2">Cuenta destino</label>
+            <label htmlFor="transfer-destination-input" className="block text-sm font-medium text-slate-700 mb-2">Cuenta destino</label>
             <div className="flex gap-3">
               <input
+                id="transfer-destination-input"
                 type="text"
                 value={destinationAccount}
                 onChange={(event) => {
@@ -634,7 +640,7 @@ export function TransferPage() {
         )}
 
         <div>
-          <label className="block text-sm font-medium text-slate-700 mb-2">Monto</label>
+          <label htmlFor="transfer-amount-input" className="block text-sm font-medium text-slate-700 mb-2">Monto</label>
           <div className="flex flex-wrap gap-2 mb-3">
             {[10, 20, 50, 80, 100].map((quickAmount) => (
               <button
@@ -652,6 +658,7 @@ export function TransferPage() {
             ))}
           </div>
           <input
+            id="transfer-amount-input"
             type="number"
             value={amount}
             onChange={(event) => setAmount(event.target.value)}
@@ -663,8 +670,9 @@ export function TransferPage() {
         </div>
 
         <div>
-          <label className="block text-sm font-medium text-slate-700 mb-2">Descripción</label>
+          <label htmlFor="transfer-description-textarea" className="block text-sm font-medium text-slate-700 mb-2">Descripción</label>
           <textarea
+            id="transfer-description-textarea"
             value={description}
             onChange={(event) => setDescription(event.target.value)}
             placeholder="Ejemplo: Pago arriendo"

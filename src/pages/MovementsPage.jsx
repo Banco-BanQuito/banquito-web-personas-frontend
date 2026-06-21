@@ -76,12 +76,13 @@ export function MovementsPage() {
 
       {/* Selector de cuenta */}
       <div className="bg-white rounded-2xl shadow-sm border border-slate-200 p-5 max-w-3xl">
-        <label className="block text-sm font-medium text-slate-700 mb-2">Seleccionar cuenta</label>
+        <label htmlFor="movements-account-select" className="block text-sm font-medium text-slate-700 mb-2">Seleccionar cuenta</label>
 
         {loadingAccounts ? (
           <div className="h-12 bg-slate-100 rounded-xl animate-pulse" />
         ) : (
           <select
+            id="movements-account-select"
             value={selectedAccountId}
             onChange={handleAccountChange}
             className="w-full rounded-xl border border-slate-300 px-4 py-3 focus:outline-none focus:ring-2 focus:ring-green-700"

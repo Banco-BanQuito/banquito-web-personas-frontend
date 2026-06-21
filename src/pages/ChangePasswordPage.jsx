@@ -60,10 +60,11 @@ export function ChangePasswordPage() {
 
         <form onSubmit={handleSubmit} className="space-y-5">
           <div>
-            <label className="block text-sm font-medium text-gray-700 mb-1">
+            <label htmlFor="change-pwd-current" className="block text-sm font-medium text-gray-700 mb-1">
               Contraseña actual (tu cédula / RUC)
             </label>
             <input
+              id="change-pwd-current"
               type="password"
               value={currentPassword}
               onChange={(e) => setCurrentPassword(e.target.value)}
@@ -74,10 +75,11 @@ export function ChangePasswordPage() {
           </div>
 
           <div>
-            <label className="block text-sm font-medium text-gray-700 mb-1">
+            <label htmlFor="change-pwd-new" className="block text-sm font-medium text-gray-700 mb-1">
               Nueva contraseña
             </label>
             <input
+              id="change-pwd-new"
               type="password"
               value={newPassword}
               onChange={(e) => setNewPassword(e.target.value)}
@@ -89,10 +91,11 @@ export function ChangePasswordPage() {
           </div>
 
           <div>
-            <label className="block text-sm font-medium text-gray-700 mb-1">
+            <label htmlFor="change-pwd-confirm" className="block text-sm font-medium text-gray-700 mb-1">
               Confirmar nueva contraseña
             </label>
             <input
+              id="change-pwd-confirm"
               type="password"
               value={confirmPassword}
               onChange={(e) => setConfirmPassword(e.target.value)}

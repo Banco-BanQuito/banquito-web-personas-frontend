@@ -146,7 +146,7 @@ export function DashboardPage() {
                 <p className="text-4xl font-black tracking-tight">
                   ${totalAvailable.toLocaleString('es-EC', { minimumFractionDigits: 2 })}
                 </p>
-                <p className="text-xs text-green-200 mt-1">USD · {accounts.length} cuenta{accounts.length !== 1 ? 's' : ''}</p>
+                <p className="text-xs text-green-200 mt-1">USD · {accounts.length} cuenta{accounts.length === 1 ? '' : 's'}</p>
               </div>
 
               <div className="bg-white rounded-2xl border border-slate-200 p-6">

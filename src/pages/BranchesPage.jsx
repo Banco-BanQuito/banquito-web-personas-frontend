@@ -14,6 +14,10 @@ export const BranchesPage = () => {
         setBranches(response.data || []);
         setError('');
       } catch (err) {
+        if (import.meta.env.DEV) {
+          // eslint-disable-next-line no-console
+          console.debug('Error loading branches:', err.message);
+        }
         setError('No se pudieron cargar las sucursales.');
       } finally {
         setLoading(false);

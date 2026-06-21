@@ -1,8 +1,9 @@
 import React from 'react';
+import PropTypes from 'prop-types';
 import { getHolidays } from '../api/partyApi';
 
 const isMaintenance = (name) =>
-  name && name.toLowerCase().startsWith('mantenimiento');
+  name?.toLowerCase().startsWith('mantenimiento');
 
 const MONTHS_ES = [
   'Enero', 'Febrero', 'Marzo', 'Abril', 'Mayo', 'Junio',
@@ -208,7 +209,7 @@ function CountdownBadge({ dateStr }) {
   if (diff <= 7) {
     return (
       <span className="text-xs font-bold px-2.5 py-1 rounded-full bg-amber-400 text-amber-900">
-        En {diff} día{diff !== 1 ? 's' : ''}
+        En {diff} día{diff === 1 ? '' : 's'}
       </span>
     );
   }
@@ -223,6 +224,15 @@ function CountdownBadge({ dateStr }) {
 
   return <span className="text-xs text-slate-400 font-medium">{diff} días</span>;
 }
+
+CountdownBadge.propTypes = {
+  dateStr: PropTypes.string.isRequired,
+};
+
+const holidayShape = PropTypes.shape({
+  name: PropTypes.string,
+  holidayDate: PropTypes.string,
+});
 
 function HolidayCard({ holiday, index }) {
   const maintenance = isMaintenance(holiday.name);
@@ -290,6 +300,11 @@ function HolidayCard({ holiday, index }) {
   );
 }
 
+HolidayCard.propTypes = {
+  holiday: holidayShape.isRequired,
+  index: PropTypes.number.isRequired,
+};
+
 function FilterButton({ item, filter, onSelect }) {
   const { key, label, count } = item;
   const isSelected = filter === key;
@@ -313,6 +328,16 @@ function FilterButton({ item, filter, onSelect }) {
   );
 }
 
+FilterButton.propTypes = {
+  item: PropTypes.shape({
+    key: PropTypes.string.isRequired,
+    label: PropTypes.string,
+    count: PropTypes.number,
+  }).isRequired,
+  filter: PropTypes.string,
+  onSelect: PropTypes.func.isRequired,
+};
+
 function NextHolidayCard({ holiday }) {
   return (
     <div
@@ -331,6 +356,10 @@ function NextHolidayCard({ holiday }) {
     </div>
   );
 }
+
+NextHolidayCard.propTypes = {
+  holiday: holidayShape.isRequired,
+};
 
 function NextMaintenanceCard({ holiday }) {
   return (
@@ -352,6 +381,10 @@ function NextMaintenanceCard({ holiday }) {
     </div>
   );
 }
+
+NextMaintenanceCard.propTypes = {
+  holiday: holidayShape.isRequired,
+};
 
 function StatsBar({ holidays, totalF, totalM }) {
   return (
@@ -380,6 +413,12 @@ function StatsBar({ holidays, totalF, totalM }) {
     </div>
   );
 }
+
+StatsBar.propTypes = {
+  holidays: PropTypes.arrayOf(holidayShape).isRequired,
+  totalF: PropTypes.number.isRequired,
+  totalM: PropTypes.number.isRequired,
+};
 
 export function HolidaysPage() {
   const [holidays, setHolidays] = React.useState([]);
@@ -467,7 +506,7 @@ export function HolidaysPage() {
 
         {loading && <Skeleton />}
 
-        {!loading && Object.keys(byYear).sort().map((year, yearIndex) => (
+        {!loading && Object.keys(byYear).sort((a, b) => a.localeCompare(b)).map((year, yearIndex) => (
           <div
             key={year}
             className="bq-card-enter space-y-3"

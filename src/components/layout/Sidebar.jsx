@@ -1,4 +1,5 @@
 import { NavLink } from 'react-router-dom';
+import PropTypes from 'prop-types';
 import {
   LayoutDashboard,
   Wallet,
@@ -46,7 +47,7 @@ const Sidebar = ({ isOpen, onToggle }) => {
           <NavLink
             key={path}
             to={path}
-            title={!isOpen ? label : undefined}
+            title={isOpen ? undefined : label}
             className={({ isActive }) =>
               `flex items-center gap-3 rounded-md transition-colors duration-150 no-underline ${
                 isOpen ? 'px-3 py-2.5' : 'justify-center px-0 py-2.5'
@@ -85,6 +86,11 @@ const Sidebar = ({ isOpen, onToggle }) => {
       )}
     </aside>
   );
+};
+
+Sidebar.propTypes = {
+  isOpen: PropTypes.bool.isRequired,
+  onToggle: PropTypes.func.isRequired,
 };
 
 export default Sidebar;
