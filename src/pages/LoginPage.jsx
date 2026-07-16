@@ -88,7 +88,7 @@ export function LoginPage() {
         <div className="w-full max-w-md">
           <div className="text-center mb-8">
             <h2 className="text-3xl font-bold text-gray-900">
-              Ingreso de cliente
+              Ingreso de cliente - prueba CI/CD
             </h2>
 
             <p className="text-gray-600 mt-2">
