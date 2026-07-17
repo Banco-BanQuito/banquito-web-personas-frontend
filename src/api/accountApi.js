@@ -5,6 +5,19 @@ const accountApi = axios.create({
   timeout: Number(import.meta.env.VITE_API_TIMEOUT || 10000),
 });
 
+accountApi.interceptors.request.use((config) => {
+  try {
+    const stored = localStorage.getItem('banquito_web_personas_auth');
+    const idToken = stored ? JSON.parse(stored)?.idToken : null;
+    if (idToken) {
+      config.headers['Authorization'] = `Bearer ${idToken}`;
+    }
+  } catch {
+    // no-op: request proceeds without the auth header
+  }
+  return config;
+});
+
 export const getAccountsByCustomerId = (customerId) => {
   return accountApi.get(`/accounts/customer/${customerId}`);
 };

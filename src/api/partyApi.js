@@ -5,12 +5,82 @@ const partyApi = axios.create({
   timeout: Number(import.meta.env.VITE_API_TIMEOUT || 10000),
 });
 
-export const loginCustomer = (username, password) => {
-  return partyApi.post('/auth/login', { username, password });
+partyApi.interceptors.request.use((config) => {
+  try {
+    const stored = localStorage.getItem('banquito_web_personas_auth');
+    const idToken = stored ? JSON.parse(stored)?.idToken : null;
+    if (idToken) {
+      config.headers['Authorization'] = `Bearer ${idToken}`;
+    }
+  } catch {
+    // no-op: request proceeds without the auth header
+  }
+  return config;
+});
+
+const IDENTITY_PLATFORM_API_KEY = import.meta.env.VITE_IDENTITY_PLATFORM_API_KEY || '';
+const SIGN_IN_URL = `https://identitytoolkit.googleapis.com/v1/accounts:signInWithPassword?key=${IDENTITY_PLATFORM_API_KEY}`;
+const UPDATE_URL = `https://identitytoolkit.googleapis.com/v1/accounts:update?key=${IDENTITY_PLATFORM_API_KEY}`;
+const LOOKUP_URL = `https://identitytoolkit.googleapis.com/v1/accounts:lookup?key=${IDENTITY_PLATFORM_API_KEY}`;
+
+function toIdentityEmail(identificacion) {
+  return `${identificacion}@banquito.internal`;
+}
+
+async function identityFetch(url, body) {
+  const response = await fetch(url, {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify(body),
+  });
+  const data = await response.json();
+  if (!response.ok) {
+    const error = new Error(data.error?.message || 'Error de autenticación');
+    error.response = { status: response.status, data };
+    throw error;
+  }
+  return data;
+}
+
+export const loginCustomer = async (username, password) => {
+  const signInData = await identityFetch(SIGN_IN_URL, {
+    email: toIdentityEmail(username),
+    password,
+    returnSecureToken: true,
+  });
+
+  const lookupData = await identityFetch(LOOKUP_URL, { idToken: signInData.idToken });
+  const accountInfo = lookupData.users?.[0];
+  const mustChangePassword = accountInfo
+    ? accountInfo.createdAt === accountInfo.lastLoginAt
+    : false;
+
+  return {
+    data: {
+      customerId: signInData.localId,
+      username,
+      fullName: signInData.displayName || username,
+      idToken: signInData.idToken,
+      refreshToken: signInData.refreshToken,
+      mustChangePassword,
+    },
+  };
 };
 
-export const changePassword = (username, currentPassword, newPassword) => {
-  return partyApi.put('/auth/change-password', { username, currentPassword, newPassword });
+export const changePassword = async (username, currentPassword, newPassword) => {
+  const signInData = await identityFetch(SIGN_IN_URL, {
+    email: toIdentityEmail(username),
+    password: currentPassword,
+    returnSecureToken: true,
+  });
+
+  const updateData = await identityFetch(UPDATE_URL, {
+    idToken: signInData.idToken,
+    password: newPassword,
+    returnSecureToken: true,
+  });
+
+  return { data: updateData };
 };
 
 export const getCustomer = (id) => {
