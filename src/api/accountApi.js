@@ -13,7 +13,7 @@ accountApi.interceptors.request.use((config) => {
       config.headers['Authorization'] = `Bearer ${idToken}`;
     }
   } catch {
-    // no-op: request proceeds without the auth header
+    return config;
   }
   return config;
 });

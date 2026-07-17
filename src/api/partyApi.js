@@ -13,7 +13,7 @@ partyApi.interceptors.request.use((config) => {
       config.headers['Authorization'] = `Bearer ${idToken}`;
     }
   } catch {
-    // no-op: request proceeds without the auth header
+    return config;
   }
   return config;
 });
@@ -55,10 +55,6 @@ export const loginCustomer = async (username, password) => {
     ? accountInfo.createdAt === accountInfo.lastLoginAt
     : false;
 
-  // Identity Platform only proves *who* is signing in (the credential). The
-  // numeric customerId used by the rest of the app lives in party-service's
-  // own Customer record, keyed by the same identification (cedula/RUC) used
-  // as the login username, so we resolve it right after authenticating.
   const customerRes = await partyApi.get(`/customers/${username}`, {
     headers: { Authorization: `Bearer ${signInData.idToken}` },
   });
