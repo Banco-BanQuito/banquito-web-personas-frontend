@@ -55,11 +55,21 @@ export const loginCustomer = async (username, password) => {
     ? accountInfo.createdAt === accountInfo.lastLoginAt
     : false;
 
+  // Identity Platform only proves *who* is signing in (the credential). The
+  // numeric customerId used by the rest of the app lives in party-service's
+  // own Customer record, keyed by the same identification (cedula/RUC) used
+  // as the login username, so we resolve it right after authenticating.
+  const customerRes = await partyApi.get(`/customers/${username}`, {
+    headers: { Authorization: `Bearer ${signInData.idToken}` },
+  });
+  const customer = customerRes.data;
+
   return {
     data: {
-      customerId: signInData.localId,
+      customerId: customer.id,
       username,
-      fullName: signInData.displayName || username,
+      fullName: customer.fullName || customer.legalName || username,
+      customerType: customer.customerType,
       idToken: signInData.idToken,
       refreshToken: signInData.refreshToken,
       mustChangePassword,
