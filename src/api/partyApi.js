@@ -66,6 +66,8 @@ export const loginCustomer = async (username, password) => {
       username,
       fullName: customer.fullName || customer.legalName || username,
       customerType: customer.customerType,
+      customerStatus: customer.status,
+      credentialStatus: 'ACTIVA',
       idToken: signInData.idToken,
       refreshToken: signInData.refreshToken,
       mustChangePassword,
