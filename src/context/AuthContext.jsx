@@ -43,6 +43,8 @@ export function AuthProvider({ children }) {
         mustChangePassword: userData.mustChangePassword,
         portal: 'web-personas',
         user: userData,
+        idToken: data.idToken,
+        refreshToken: data.refreshToken,
       };
 
       setAuth(newAuth);
