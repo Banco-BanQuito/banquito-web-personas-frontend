@@ -3,6 +3,9 @@ import axios from 'axios';
 const partyApi = axios.create({
   baseURL: `${import.meta.env.VITE_PARTY_API_BASE_URL || 'http://localhost:8083'}/api/v2`,
   timeout: Number(import.meta.env.VITE_API_TIMEOUT || 10000),
+  headers: {
+    ...(import.meta.env.VITE_APIGEE_API_KEY ? { 'x-api-key': import.meta.env.VITE_APIGEE_API_KEY, apikey: import.meta.env.VITE_APIGEE_API_KEY } : {})
+  },
 });
 
 partyApi.interceptors.request.use((config) => {
