@@ -1,10 +1,14 @@
 import axios from 'axios';
+import { buildEnv } from '../build-env';
+
+const APIGEE_API_KEY = buildEnv.apigeeApiKey || import.meta.env.VITE_APIGEE_API_KEY || '';
+const IDENTITY_PLATFORM_API_KEY = buildEnv.identityPlatformApiKey || import.meta.env.VITE_IDENTITY_PLATFORM_API_KEY || '';
 
 const partyApi = axios.create({
   baseURL: `${import.meta.env.VITE_PARTY_API_BASE_URL || 'http://localhost:8083'}/api/v2`,
   timeout: Number(import.meta.env.VITE_API_TIMEOUT || 10000),
   headers: {
-    ...(import.meta.env.VITE_APIGEE_API_KEY ? { 'x-api-key': import.meta.env.VITE_APIGEE_API_KEY, apikey: import.meta.env.VITE_APIGEE_API_KEY } : {})
+    ...(APIGEE_API_KEY ? { 'x-api-key': APIGEE_API_KEY, apikey: APIGEE_API_KEY } : {})
   },
 });
 
@@ -21,7 +25,6 @@ partyApi.interceptors.request.use((config) => {
   return config;
 });
 
-const IDENTITY_PLATFORM_API_KEY = import.meta.env.VITE_IDENTITY_PLATFORM_API_KEY || '';
 const SIGN_IN_URL = `https://identitytoolkit.googleapis.com/v1/accounts:signInWithPassword?key=${IDENTITY_PLATFORM_API_KEY}`;
 const UPDATE_URL = `https://identitytoolkit.googleapis.com/v1/accounts:update?key=${IDENTITY_PLATFORM_API_KEY}`;
 const LOOKUP_URL = `https://identitytoolkit.googleapis.com/v1/accounts:lookup?key=${IDENTITY_PLATFORM_API_KEY}`;
