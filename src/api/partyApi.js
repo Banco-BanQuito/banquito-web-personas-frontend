@@ -1,5 +1,6 @@
 import axios from 'axios';
 import { buildEnv } from '../build-env';
+import { getFreshAuthSession } from './authSession';
 
 const APIGEE_API_KEY = buildEnv.apigeeApiKey || import.meta.env.VITE_APIGEE_API_KEY || '';
 const IDENTITY_PLATFORM_API_KEY = buildEnv.identityPlatformApiKey || import.meta.env.VITE_IDENTITY_PLATFORM_API_KEY || '';
@@ -12,12 +13,11 @@ const partyApi = axios.create({
   },
 });
 
-partyApi.interceptors.request.use((config) => {
+partyApi.interceptors.request.use(async (config) => {
   try {
-    const stored = localStorage.getItem('banquito_web_personas_auth');
-    const idToken = stored ? JSON.parse(stored)?.idToken : null;
-    if (idToken) {
-      config.headers['Authorization'] = `Bearer ${idToken}`;
+    const session = await getFreshAuthSession();
+    if (session?.idToken) {
+      config.headers['Authorization'] = `Bearer ${session.idToken}`;
     }
   } catch {
     return config;
@@ -76,6 +76,7 @@ export const loginCustomer = async (username, password) => {
       credentialStatus: 'ACTIVA',
       idToken: signInData.idToken,
       refreshToken: signInData.refreshToken,
+      expiresAt: Date.now() + Number(signInData.expiresIn || 3600) * 1000,
       mustChangePassword,
     },
   };

@@ -1,5 +1,6 @@
 import axios from 'axios';
 import { buildEnv } from '../build-env';
+import { getFreshAuthSession } from './authSession';
 
 const APIGEE_API_KEY = buildEnv.apigeeApiKey || import.meta.env.VITE_APIGEE_API_KEY || '';
 
@@ -11,12 +12,11 @@ const accountApi = axios.create({
   },
 });
 
-accountApi.interceptors.request.use((config) => {
+accountApi.interceptors.request.use(async (config) => {
   try {
-    const stored = localStorage.getItem('banquito_web_personas_auth');
-    const idToken = stored ? JSON.parse(stored)?.idToken : null;
-    if (idToken) {
-      config.headers['Authorization'] = `Bearer ${idToken}`;
+    const session = await getFreshAuthSession();
+    if (session?.idToken) {
+      config.headers['Authorization'] = `Bearer ${session.idToken}`;
     }
   } catch {
     return config;

@@ -45,6 +45,7 @@ export function AuthProvider({ children }) {
         user: userData,
         idToken: data.idToken,
         refreshToken: data.refreshToken,
+        expiresAt: data.expiresAt,
       };
 
       setAuth(newAuth);
